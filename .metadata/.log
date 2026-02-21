@@ -1,0 +1,43 @@
+!SESSION 2026-02-21 12:05:13.009 -----------------------------------------------
+eclipse.buildId=Version 1.19.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -keyring /Users/mahinnaveen/.eclipse_keyring
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -keyring /Users/mahinnaveen/.eclipse_keyring
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2026-02-21 12:05:22.261
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2026-02-21 12:05:22.262
+!MESSAGE Log4j2 initialized with config file /Users/mahinnaveen/Documents/GitHub/FY25_26_Embedded-Systems/.metadata/.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2026-02-21 12:05:25.258
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.cdt.core 1 0 2026-02-21 12:07:28.395
+!MESSAGE Indexed 'template' (25 sources, 153 headers) in 4 sec: 14,984 declarations; 62,997 references; 1 unresolved inclusions; 92 syntax errors; 240 unresolved names (0.31%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2026-02-21 12:07:44.003
+!MESSAGE Indexed 'template-PCU' (0 sources, 0 headers) in 0 sec: 0 declarations; 0 references; 0 unresolved inclusions; 0 syntax errors; 0 unresolved names (0%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2026-02-21 12:10:08.695
+!MESSAGE Indexed 'template' (24 sources, 120 headers) in 3.25 sec: 12,330 declarations; 53,211 references; 5 unresolved inclusions; 1,232 syntax errors; 1,652 unresolved names (2.5%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2026-02-21 12:10:22.170
+!MESSAGE Indexed 'template-pcu' (0 sources, 0 headers) in 0 sec: 0 declarations; 0 references; 0 unresolved inclusions; 0 syntax errors; 0 unresolved names (0%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2026-02-21 12:10:37.065
+!MESSAGE Indexed 'template-chu' (25 sources, 153 headers) in 3.16 sec: 14,568 declarations; 60,765 references; 5 unresolved inclusions; 230 syntax errors; 1,491 unresolved names (1.9%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2026-02-21 12:10:43.612
+!MESSAGE Indexed 'template-vcu' (25 sources, 153 headers) in 3.28 sec: 14,568 declarations; 60,765 references; 5 unresolved inclusions; 230 syntax errors; 1,491 unresolved names (1.9%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2026-02-21 12:10:49.384
+!MESSAGE Indexed 'template-rhu' (25 sources, 153 headers) in 3.17 sec: 14,568 declarations; 60,765 references; 5 unresolved inclusions; 230 syntax errors; 1,491 unresolved names (1.9%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2026-02-21 12:11:03.199
+!MESSAGE Indexed 'template-fhu' (25 sources, 153 headers) in 3.02 sec: 14,568 declarations; 60,765 references; 5 unresolved inclusions; 230 syntax errors; 1,491 unresolved names (1.9%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2026-02-21 12:11:30.764
+!MESSAGE Indexed 'Propulsion_Demo' (24 sources, 86 headers) in 1.95 sec: 5,450 declarations; 37,633 references; 4 unresolved inclusions; 83 syntax errors; 1,197 unresolved names (2.7%)
