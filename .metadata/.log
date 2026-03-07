@@ -310,3 +310,42 @@ Project's 'Rear Hub Unit' active one is 'Rear Hub Unit.ioc' file
 
 !ENTRY org.eclipse.cdt.core 1 0 2026-02-21 14:04:10.042
 !MESSAGE Indexed 'propulsion_control_unit' (24 sources, 121 headers) in 1.35 sec: 12,336 declarations; 55,882 references; 1 unresolved inclusions; 92 syntax errors; 240 unresolved names (0.35%)
+!SESSION 2026-02-21 15:38:17.289 -----------------------------------------------
+eclipse.buildId=Version 1.19.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -keyring /Users/mahinnaveen/.eclipse_keyring
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -keyring /Users/mahinnaveen/.eclipse_keyring
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2026-02-21 15:40:04.803
+!MESSAGE Log4j2 initialized with config file /Users/mahinnaveen/Documents/GitHub/FY25_26_Embedded-Systems/.metadata/.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2026-02-21 15:40:11.942
+!MESSAGE Started RMI Server, listening on port 41337
+!SESSION 2026-02-24 19:48:47.461 -----------------------------------------------
+eclipse.buildId=Version 1.19.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -keyring /Users/mahinnaveen/.eclipse_keyring
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -keyring /Users/mahinnaveen/.eclipse_keyring
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2026-02-24 19:49:02.754
+!MESSAGE Log4j2 initialized with config file /Users/mahinnaveen/Documents/GitHub/FY25_26_Embedded-Systems/.metadata/.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2026-02-24 19:49:11.361
+!MESSAGE Started RMI Server, listening on port 41337
+!SESSION 2026-03-07 11:23:54.410 -----------------------------------------------
+eclipse.buildId=Version 1.19.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -keyring /Users/mahinnaveen/.eclipse_keyring
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -keyring /Users/mahinnaveen/.eclipse_keyring
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2026-03-07 11:24:06.922
+!MESSAGE Log4j2 initialized with config file /Users/mahinnaveen/Documents/GitHub/FY25_26_Embedded-Systems/.metadata/.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2026-03-07 11:24:14.309
+!MESSAGE Started RMI Server, listening on port 41337
