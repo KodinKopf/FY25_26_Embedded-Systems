@@ -60,8 +60,8 @@ all: main-build
 main-build: center_hub_unit.elf secondary-outputs
 
 # Tool invocations
-center_hub_unit.elf center_hub_unit.map: $(OBJS) $(USER_OBJS) C:\College\Guadaloop\FY25_26_Embedded-Systems\center_hub_unit\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "center_hub_unit.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\College\Guadaloop\FY25_26_Embedded-Systems\center_hub_unit\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="center_hub_unit.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+center_hub_unit.elf center_hub_unit.map: $(OBJS) $(USER_OBJS) C:\Users\Prady\OneDrive\Desktop\EngCS\Guadaloop\FY25_26_Embedded-Systems\center_hub_unit\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "center_hub_unit.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Prady\OneDrive\Desktop\EngCS\Guadaloop\FY25_26_Embedded-Systems\center_hub_unit\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="center_hub_unit.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
