@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <math.h>
 
 // Just some stuff for printing (sending to GUI)
 uint32_t packetCounter = 0;
@@ -49,7 +50,7 @@ Temp_Sensor_t tempSensors[3];
 HallSensor_t hallSensors[3];
 
 // Raw ADC buffers
-uint16_t adc1_temp_raw[6]; // 12 for temp sensors, every pair of 2 is for a sensor (one for each pin)
+uint16_t adc1_temp_raw[6];
 uint16_t adc2_he_raw[3];
 
 /* USER CODE END Includes */
@@ -98,34 +99,32 @@ static void MX_ADC1_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-int __io_putchar(int ch) {
-    HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
-    return ch;
+// matches working code's printf redirect
+int _write(int file, char *ptr, int len) {
+    HAL_UART_Transmit(&huart2, (uint8_t *)ptr, len, HAL_MAX_DELAY);
+    return len;
 }
 
 float adc_to_voltage(uint16_t raw) {
     return ((float)raw * 3.3f) / 4095.0f;
 }
 
-
-
-
-//float compute_temp(float va, float vb) {
-//	float diffVoltage = va-vb;
-//	float c = (diffVoltage+1.65)/3.3;
-//	float tempValue = (2000*c-1000) / (3.85*(1-c));
-//	return tempValue;
-//}
-
 float compute_temp(float Va, float Vb) {
-	float Vexc_est = 2.0f * Va;              // if R1 = R2
-	float Rx = (10000.0f * Vb) / (Vexc_est - Vb);
-	float tempValue = (Rx - 1000.0f) / 3.85f;
-	return tempValue;
+    float Vexc_est = 2.0f * Va;
+    float denom = Vexc_est - Vb;
+    if (fabsf(denom) < 0.001f || Va < 0.01f) {
+        return 0.0f;
+    }
+    float Rx = (10000.0f * Vb) / denom;
+    float tempValue = (Rx - 1000.0f) / 3.85f;
+    if (isnan(tempValue) || isinf(tempValue)) {
+        return 0.0f;
+    }
+    return tempValue;
 }
 
 float compute_hall(float voltage){
-	return (voltage - 1.65f) / 0.001254f;
+    return (voltage - 1.65f) / 0.001254f;
 }
 
 void update_temp_sensors(void) {
@@ -141,31 +140,29 @@ void update_temp_sensors(void) {
     }
 }
 
-// Implement later
 void update_hall_sensors(void) {
-	 for (int i = 0; i < 3; i++) {
-	        hallSensors[i].raw = adc2_he_raw[i];
-	        hallSensors[i].voltage = adc_to_voltage(hallSensors[i].raw);
-	        hallSensors[i].field_mt = compute_hall(hallSensors[i].voltage) / 10.0f;
-	 }
+     for (int i = 0; i < 3; i++) {
+            hallSensors[i].raw = adc2_he_raw[i];
+            hallSensors[i].voltage = adc_to_voltage(hallSensors[i].raw);
+            hallSensors[i].field_mt = compute_hall(hallSensors[i].voltage) / 10.0f;
+     }
 }
 
-
 void print_temp_data() {
-	 printf("\r\n====================\r\n");
-	 for (int i = 0; i < 3; i++) {
-	         printf("TEMP %d | raw_va=%u raw_vb=%u | Va=%.4f V Vb=%.4f V | T=%.2f C\r\n",
-	                i,
-	                tempSensors[i].raw_va,
-	                tempSensors[i].raw_vb,
-	                tempSensors[i].va,
-	                tempSensors[i].vb,
-	                tempSensors[i].temp_c);
-	 }
+     printf("\r\n====================\r\n");
+     for (int i = 0; i < 3; i++) {
+             printf("TEMP %d | raw_va=%u raw_vb=%u | Va=%.4f V Vb=%.4f V | T=%.2f C\r\n",
+                    i,
+                    tempSensors[i].raw_va,
+                    tempSensors[i].raw_vb,
+                    tempSensors[i].va,
+                    tempSensors[i].vb,
+                    tempSensors[i].temp_c);
+     }
 }
 
 void print_temp_packet(void) {
-    printf("4: %lu,%d,%d,%.2f,%.2f,%.2f,0,0,0,0,0,0,0\r\n",
+    printf("4: %lu,%d,%d,%.2f,%.2f,%.2f,0.00,0.00,0.00,0.00,0.00,0.00,0.00\r\n",
            packetCounter,
            stateCode,
            healthStatus,
@@ -175,7 +172,7 @@ void print_temp_packet(void) {
 }
 
 void print_hall_packet(void) {
-    printf("5: %lu,%d,%d,%.2f,%.2f,%.2f,0,0,0,0,0,0,0,0,0,0\r\n",
+    printf("5: %lu,%d,%d,%.2f,%.2f,%.2f,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00\r\n",
            packetCounter,
            stateCode,
            healthStatus,
@@ -216,17 +213,14 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_ADC2_Init();
-  MX_CAN2_Init();
   MX_USART2_UART_Init();
   MX_ADC1_Init();
+  MX_ADC2_Init();
+  // MX_CAN2_Init();  // commented out — will hang in Error_Handler if no transceiver connected
   /* USER CODE BEGIN 2 */
-
-//  printf("Testing update");
 
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc1_temp_raw, 6);
   HAL_ADC_Start_DMA(&hadc2, (uint32_t*)adc2_he_raw, 3);
-//  printf("ADC Started");
 
   /* USER CODE END 2 */
 
@@ -234,18 +228,18 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  update_temp_sensors();
-	  update_hall_sensors();
-
-	  print_temp_packet();
-	  print_hall_packet();
-
-	  packetCounter++;
-
-	  HAL_Delay(200);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+      update_temp_sensors();
+      update_hall_sensors();
+
+      print_temp_packet();
+      print_hall_packet();
+
+      packetCounter++;
+
+      HAL_Delay(200);
   }
   /* USER CODE END 3 */
 }
@@ -315,8 +309,6 @@ static void MX_ADC1_Init(void)
 
   /* USER CODE END ADC1_Init 1 */
 
-  /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
-  */
   hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
@@ -334,18 +326,14 @@ static void MX_ADC1_Init(void)
     Error_Handler();
   }
 
-  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-  */
   sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES;
+  sConfig.SamplingTime = ADC_SAMPLETIME_84CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
   }
 
-  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-  */
   sConfig.Channel = ADC_CHANNEL_1;
   sConfig.Rank = 2;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
@@ -353,8 +341,6 @@ static void MX_ADC1_Init(void)
     Error_Handler();
   }
 
-  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-  */
   sConfig.Channel = ADC_CHANNEL_4;
   sConfig.Rank = 3;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
@@ -362,8 +348,6 @@ static void MX_ADC1_Init(void)
     Error_Handler();
   }
 
-  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-  */
   sConfig.Channel = ADC_CHANNEL_5;
   sConfig.Rank = 4;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
@@ -371,8 +355,6 @@ static void MX_ADC1_Init(void)
     Error_Handler();
   }
 
-  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-  */
   sConfig.Channel = ADC_CHANNEL_6;
   sConfig.Rank = 5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
@@ -380,14 +362,13 @@ static void MX_ADC1_Init(void)
     Error_Handler();
   }
 
-  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-  */
   sConfig.Channel = ADC_CHANNEL_7;
   sConfig.Rank = 6;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
   }
+
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
@@ -412,8 +393,6 @@ static void MX_ADC2_Init(void)
 
   /* USER CODE END ADC2_Init 1 */
 
-  /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
-  */
   hadc2.Instance = ADC2;
   hadc2.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
   hadc2.Init.Resolution = ADC_RESOLUTION_12B;
@@ -431,18 +410,14 @@ static void MX_ADC2_Init(void)
     Error_Handler();
   }
 
-  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-  */
   sConfig.Channel = ADC_CHANNEL_8;
   sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES;
+  sConfig.SamplingTime = ADC_SAMPLETIME_84CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
   {
     Error_Handler();
   }
 
-  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-  */
   sConfig.Channel = ADC_CHANNEL_9;
   sConfig.Rank = 2;
   if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
@@ -450,14 +425,13 @@ static void MX_ADC2_Init(void)
     Error_Handler();
   }
 
-  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-  */
   sConfig.Channel = ADC_CHANNEL_10;
   sConfig.Rank = 3;
   if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
   {
     Error_Handler();
   }
+
   /* USER CODE BEGIN ADC2_Init 2 */
 
   /* USER CODE END ADC2_Init 2 */
