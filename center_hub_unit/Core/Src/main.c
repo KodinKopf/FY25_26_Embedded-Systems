@@ -22,7 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
-#include <math.h>
+//#include <math.h>
 
 // Just some stuff for printing (sending to GUI)
 uint32_t packetCounter = 0;
@@ -52,6 +52,21 @@ HallSensor_t hallSensors[3];
 // Raw ADC buffers
 uint16_t adc1_temp_raw[6];
 uint16_t adc2_he_raw[3];
+
+// Averaging
+
+#define AVG_N 8
+
+uint32_t temp_sum_va[3] = {0};
+uint32_t temp_sum_vb[3] = {0};
+uint32_t hall_sum[3]    = {0};
+
+uint16_t temp_hist_va[3][AVG_N] = {0};
+uint16_t temp_hist_vb[3][AVG_N] = {0};
+uint16_t hall_hist[3][AVG_N]    = {0};
+
+uint8_t avg_index = 0;
+uint8_t avg_count = 0;
 
 /* USER CODE END Includes */
 
@@ -109,18 +124,25 @@ float adc_to_voltage(uint16_t raw) {
     return ((float)raw * 3.3f) / 4095.0f;
 }
 
+//float compute_temp(float Va, float Vb) {
+//    float Vexc_est = 2.0f * Va;
+//    float denom = Vexc_est - Vb;
+////    if (fabsf(denom) < 0.001f || Va < 0.01f) {
+////        return 0.0f;
+////    }
+//    float Rx = (10000.0f * Vb) / denom;
+//    float tempValue = (Rx - 1000.0f) / 3.85f;
+////    if (isnan(tempValue) || isinf(tempValue)) {
+////        return 0.0f;
+////    }
+//    return tempValue;
+//}
+
 float compute_temp(float Va, float Vb) {
-    float Vexc_est = 2.0f * Va;
-    float denom = Vexc_est - Vb;
-    if (fabsf(denom) < 0.001f || Va < 0.01f) {
-        return 0.0f;
-    }
-    float Rx = (10000.0f * Vb) / denom;
-    float tempValue = (Rx - 1000.0f) / 3.85f;
-    if (isnan(tempValue) || isinf(tempValue)) {
-        return 0.0f;
-    }
-    return tempValue;
+	float Vexc_est = 2.0f * Va;              // if R1 = R2
+	float Rx = (10000.0f * Vb) / (Vexc_est - Vb);
+	float tempValue = (Rx - 1000.0f) / 3.85f;
+	return tempValue;
 }
 
 float compute_hall(float voltage){
@@ -130,8 +152,20 @@ float compute_hall(float voltage){
 void update_temp_sensors(void) {
     for (int i = 0; i < 3; i++)
     {
-        tempSensors[i].raw_va = adc1_temp_raw[2 * i];
-        tempSensors[i].raw_vb = adc1_temp_raw[2 * i + 1];
+        uint16_t new_va = adc1_temp_raw[2 * i];
+        uint16_t new_vb = adc1_temp_raw[2 * i + 1];
+
+        temp_sum_va[i] -= temp_hist_va[i][avg_index];
+        temp_sum_vb[i] -= temp_hist_vb[i][avg_index];
+
+        temp_hist_va[i][avg_index] = new_va;
+        temp_hist_vb[i][avg_index] = new_vb;
+
+        temp_sum_va[i] += new_va;
+        temp_sum_vb[i] += new_vb;
+
+        tempSensors[i].raw_va = temp_sum_va[i] / avg_count;
+        tempSensors[i].raw_vb = temp_sum_vb[i] / avg_count;
 
         tempSensors[i].va = adc_to_voltage(tempSensors[i].raw_va);
         tempSensors[i].vb = adc_to_voltage(tempSensors[i].raw_vb);
@@ -141,11 +175,17 @@ void update_temp_sensors(void) {
 }
 
 void update_hall_sensors(void) {
-     for (int i = 0; i < 3; i++) {
-            hallSensors[i].raw = adc2_he_raw[i];
-            hallSensors[i].voltage = adc_to_voltage(hallSensors[i].raw);
-            hallSensors[i].field_mt = compute_hall(hallSensors[i].voltage) / 10.0f;
-     }
+    for (int i = 0; i < 3; i++) {
+        uint16_t new_raw = adc2_he_raw[i];
+
+        hall_sum[i] -= hall_hist[i][avg_index];
+        hall_hist[i][avg_index] = new_raw;
+        hall_sum[i] += new_raw;
+
+        hallSensors[i].raw = hall_sum[i] / avg_count;
+        hallSensors[i].voltage = adc_to_voltage(hallSensors[i].raw);
+        hallSensors[i].field_mt = compute_hall(hallSensors[i].voltage) / 10.0f;
+    }
 }
 
 void print_temp_data() {
@@ -231,8 +271,13 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+	  if (avg_count < AVG_N) avg_count++;
+
       update_temp_sensors();
       update_hall_sensors();
+
+      avg_index = (avg_index + 1) % AVG_N;
 
       print_temp_packet();
       print_hall_packet();
